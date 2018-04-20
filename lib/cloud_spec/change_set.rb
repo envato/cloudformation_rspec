@@ -12,7 +12,7 @@ module CloudSpec::ChangeSet
   def create_change_set(stack)
     change_set_name = "CloudSpec-#{SecureRandom.uuid}"
     client = Aws::CloudFormation::Client.new
-    change_set_id = client.create_change_set(stack_name: change_set_name, change_set_type: 'CREATE').id
+    change_set_id = client.create_change_set(change_set_name: change_set_id,stack_name: change_set_name, change_set_type: 'CREATE').id
     if wait_change_set_complete(client, change_set_id)
       client.delete_stack(stack_name: change_set_id)
     end

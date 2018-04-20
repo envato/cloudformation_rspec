@@ -34,7 +34,7 @@ module CloudSpec::ChangeSet
   end
 
   def wait_change_set_complete(client, change_set_id)
-    client.wait_until("change_set_create_complete", {change_set_name: change_set_id, stack_name: change_set_id}, {delay: 2, max_attempts: 15})
+    client.wait_until(:change_set_create_complete, {change_set_name: change_set_id, stack_name: change_set_id}, {delay: 2, max_attempts: 15})
     true
   rescue Aws::Waiters::Errors::WaiterFailed
     false

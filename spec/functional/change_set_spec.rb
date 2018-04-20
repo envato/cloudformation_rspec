@@ -56,14 +56,13 @@ describe 'have_change_set_failed' do
   end
 
   context 'the change is not valid' do
-    let(:template) { '{"Description": "My Template"}' }
     before do
       allow(cf_stub).to receive(:wait_until).and_raise(Aws::Waiters::Errors::WaiterFailed)
       allow(change_set_mock).to receive(:status).and_return("FAILED")
     end
 
     it 'fails' do
-      expect(template).to have_change_set_failed
+      expect(stack).to have_change_set_failed
     end
 
     it 'just deletes the change set' do

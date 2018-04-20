@@ -19,7 +19,22 @@ describe 'have_change_set_failed' do
     allow(cf_stub).to receive(:describe_change_set).and_return(change_set_mock)
   end
 
+  after do
+    CloudSpec::ChangeSet.flush_cache
+  end
+
   context 'the change set is valid' do
+    let(:stack_with_different_parameters) {{
+      template_body: stack[:template_body],
+      parameters: {
+        "VpcCidr" => "10.1.0.0/16"
+      }
+    }}
+    let(:stack_with_different_body) {{
+      template_body: '{}',
+      parameters: stack[:parameters]
+    }}
+
     let(:web_server_change_mock) { instance_double(Aws::CloudFormation::Types::Change) }
     let(:web_server_resource_change_mock) { instance_double(Aws::CloudFormation::Types::ResourceChange) }
     let(:vpc_change_mock) { instance_double(Aws::CloudFormation::Types::Change) }
@@ -52,6 +67,24 @@ describe 'have_change_set_failed' do
       expect(cf_stub).to receive(:delete_stack)
       expect(cf_stub).to receive(:delete_change_set)
       expect(stack).not_to have_change_set_failed
+    end
+
+    it 'caches the change set between runs' do
+      expect(cf_stub).to receive(:create_change_set).once
+      expect(stack).not_to have_change_set_failed
+      expect(stack).not_to have_change_set_failed
+    end
+
+    it 'does not cache change sets when parameters are different' do
+      expect(cf_stub).to receive(:create_change_set).twice
+      expect(stack).not_to have_change_set_failed
+      expect(stack_with_different_parameters).not_to have_change_set_failed
+    end
+
+    it 'does not cache change sets when the template is different' do
+      expect(cf_stub).to receive(:create_change_set).twice
+      expect(stack).not_to have_change_set_failed
+      expect(stack_with_different_body).not_to have_change_set_failed
     end
   end
 

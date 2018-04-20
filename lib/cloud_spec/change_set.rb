@@ -1,6 +1,7 @@
 require 'rspec'
 require 'aws-sdk-cloudformation'
 require 'securerandom'
+require 'digest'
 
 module CloudSpec::ChangeSet
   END_STATES = [
@@ -8,14 +9,21 @@ module CloudSpec::ChangeSet
     'DELETE_COMPLETE',
     'FAILED'
   ]
-
   WAIT_DELAY = 3
+
+  @change_set_cache = {}
 
   def create_change_set(stack)
     if !stack.is_a?(Hash) || stack[:template_body].nil?
       raise ArgumentError.new("You must supply a Hash with :template_body to this expectation")
     end
     stack[:parameters] ||= {}
+
+    change_set_hash = generate_change_set_hash(stack)
+
+    if change_set = CloudSpec::ChangeSet.get_from_cache(change_set_hash)
+      return change_set
+    end
 
     change_set_name = "CloudSpec-#{SecureRandom.uuid}"
     client = Aws::CloudFormation::Client.new
@@ -35,15 +43,33 @@ module CloudSpec::ChangeSet
     end
     client.delete_change_set(change_set_name: change_set_id)
 
+    CloudSpec::ChangeSet.add_to_cache(change_set_hash, response)
     response
   end
+
+  private
 
   def wait_change_set_complete(client, change_set_id)
     client.wait_until(:stack_exists, {stack_name: change_set_id}, {delay: WAIT_DELAY})
     client.wait_until(:change_set_create_complete, {change_set_name: change_set_id, stack_name: change_set_id}, {delay: WAIT_DELAY})
   rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError => error
-    puts "Waiter failed: #{error.message}"
     false
+  end
+
+  def generate_change_set_hash(stack)
+    Digest::MD5.hexdigest(stack[:template_body] + stack[:parameters].to_json)
+  end
+
+  def self.get_from_cache(change_set_hash)
+    @change_set_cache[change_set_hash]
+  end
+
+  def self.add_to_cache(change_set_hash, change_set)
+    @change_set_cache[change_set_hash] = change_set
+  end
+
+  def self.flush_cache
+    @change_set_cache = {}
   end
 end
 

@@ -10,6 +10,7 @@ describe 'have_change_set_failed' do
     }
   }}
   let(:change_set_create_mock) { instance_double(Aws::CloudFormation::Types::CreateChangeSetOutput) }
+  let(:uuid) { "d7ad0965-7395-4660-b607-47b13b1d16c2" }
   before do
     allow(Aws::CloudFormation::Client).to receive(:new).and_return(cf_stub)
     allow(cf_stub).to receive(:create_change_set).and_return(change_set_create_mock)
@@ -17,6 +18,7 @@ describe 'have_change_set_failed' do
     allow(cf_stub).to receive(:delete_stack)
     allow(cf_stub).to receive(:delete_change_set)
     allow(cf_stub).to receive(:describe_change_set).and_return(change_set_mock)
+    allow(SecureRandom).to receive(:uuid).and_return(uuid)
   end
 
   after do
@@ -85,6 +87,22 @@ describe 'have_change_set_failed' do
       expect(cf_stub).to receive(:create_change_set).twice
       expect(stack).not_to have_change_set_failed
       expect(stack_with_different_body).not_to have_change_set_failed
+    end
+
+    it 'calls create_change_set with the required parameters' do
+      expect(cf_stub).to receive(:create_change_set).with(
+        change_set_name: "CloudSpec-#{uuid}",
+        stack_name: "CloudSpec-#{uuid}",
+        change_set_type: 'CREATE',
+        template_body: stack[:template_body],
+        parameters: [
+          {
+            parameter_key:  "VpcCidr",
+            parameter_value: "10.0.0.0/16"
+          }
+        ]
+      )
+      expect(stack).not_to have_change_set_failed
     end
   end
 

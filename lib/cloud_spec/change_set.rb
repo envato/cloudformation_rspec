@@ -9,6 +9,8 @@ module CloudSpec::ChangeSet
     'FAILED'
   ]
 
+  WAIT_DELAY = 3
+
   def create_change_set(stack)
     if !stack.is_a?(Hash) || stack[:template_body].nil?
       raise ArgumentError.new("You must supply a Hash with :template_body to this expectation")
@@ -37,8 +39,8 @@ module CloudSpec::ChangeSet
   end
 
   def wait_change_set_complete(client, change_set_id)
-    client.wait_until(:stack_exists, {stack_name: change_set_id})
-    client.wait_until(:change_set_create_complete, {change_set_name: change_set_id, stack_name: change_set_id})
+    client.wait_until(:stack_exists, {stack_name: change_set_id}, {delay: WAIT_DELAY})
+    client.wait_until(:change_set_create_complete, {change_set_name: change_set_id, stack_name: change_set_id}, {delay: WAIT_DELAY})
   rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError => error
     puts "Waiter failed: #{error.message}"
     false

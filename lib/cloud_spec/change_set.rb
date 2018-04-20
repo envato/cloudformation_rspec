@@ -28,15 +28,19 @@ module CloudSpec::ChangeSet
       client.delete_stack(stack_name: change_set_id)
     end
     response = client.describe_change_set(change_set_name: change_set_id, stack_name: change_set_name)
+    if !END_STATES.include? response.status
+      raise "Change set did not complete in time. #{response.status}"
+    end
     client.delete_change_set(change_set_name: change_set_id)
 
     response
   end
 
   def wait_change_set_complete(client, change_set_id)
-    client.wait_until(:change_set_create_complete, {change_set_name: change_set_id, stack_name: change_set_id}, {delay: 2, max_attempts: 15})
-    true
-  rescue Aws::Waiters::Errors::WaiterFailed
+    client.wait_until(:stack_exists, {stack_name: change_set_id})
+    client.wait_until(:change_set_create_complete, {change_set_name: change_set_id, stack_name: change_set_id})
+  rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError => error
+    puts "Waiter failed: #{error.message}"
     false
   end
 end

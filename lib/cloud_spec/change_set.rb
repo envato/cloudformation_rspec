@@ -10,6 +10,11 @@ module CloudSpec::ChangeSet
   ]
 
   def create_change_set(stack)
+    if stack[:template_body].nil?
+      raise ArgumentError.new("You must supply the :template_body to this expectation")
+    end
+    stack[:parameters] ||= {}
+
     change_set_name = "CloudSpec-#{SecureRandom.uuid}"
     client = Aws::CloudFormation::Client.new
     change_set_id = client.create_change_set(

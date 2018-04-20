@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency 'rspec', '~> 3'
+  gem.add_dependency 'sparkle_formation', '~> 3'
   gem.add_dependency 'aws-sdk-cloudformation', '~> 1'
   gem.add_development_dependency 'rake'
 end

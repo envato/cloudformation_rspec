@@ -2,6 +2,7 @@ require 'rspec'
 require 'aws-sdk-cloudformation'
 require 'securerandom'
 require 'digest'
+require 'sparkle_formation'
 
 module CloudSpec::ChangeSet
   END_STATES = [
@@ -11,10 +12,43 @@ module CloudSpec::ChangeSet
   ]
   WAIT_DELAY = 3
 
+  InvalidSparkleTemplate = Class.new(StandardError)
+  InvalidCloudFormationTemplate = Class.new(StandardError)
+  ChangeSetNotComplete = Class.new(StandardError)
+
   @change_set_cache = {}
 
+  def compile_sparkleformation_template(sparkle_path, template_file, compile_state)
+    begin
+      ::SparkleFormation.sparkle_path = sparkle_path
+      sparkle_template = ::SparkleFormation.compile(File.join(sparkle_path, template_file), :sparkle)
+    rescue => error
+      raise InvalidSparkleTemplate.new("Error compiling template into SparkleTemplate #{error.message}")
+    end
+  
+  
+    begin
+      sparkle_template.compile_state = compile_state
+      sparkle_template.to_json
+    rescue => error
+      raise InvalidCloudFormationTemplate.new("Error compiling template into CloudFormation #{error.message}")
+    end
+  end
+  
+
   def create_change_set(stack)
-    if !stack.is_a?(Hash) || stack[:template_body].nil?
+    if !stack.is_a?(Hash)
+      raise ArgumentError.new("You must supply a Hash to this expectation")
+    end
+
+    if stack[:compiler] == :sparkleformation
+      stack[:template_body] = compile_sparkleformation_template(stack[:sparkle_path], stack[:template_file], stack[:compile_state])
+    end
+    create_change_set_from_cloudformation(stack)
+  end
+
+  def create_change_set_from_cloudformation(stack)
+    if stack[:template_body].nil?
       raise ArgumentError.new("You must supply a Hash with :template_body to this expectation")
     end
     stack[:parameters] ||= {}
@@ -39,7 +73,7 @@ module CloudSpec::ChangeSet
     end
     response = client.describe_change_set(change_set_name: change_set_id, stack_name: change_set_name)
     if !END_STATES.include? response.status
-      raise "Change set did not complete in time. #{response.status}"
+      raise ChangeSetNotComplete.new("Change set did not complete in time. #{response.status}")
     end
     client.delete_change_set(change_set_name: change_set_id)
 

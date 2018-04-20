@@ -10,8 +10,8 @@ module CloudSpec::ChangeSet
   ]
 
   def create_change_set(stack)
-    if stack[:template_body].nil?
-      raise ArgumentError.new("You must supply the :template_body to this expectation")
+    if !stack.is_a?(Hash) || stack[:template_body].nil?
+      raise ArgumentError.new("You must supply a Hash with :template_body to this expectation")
     end
     stack[:parameters] ||= {}
 

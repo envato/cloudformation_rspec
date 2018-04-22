@@ -1,2 +1,2 @@
 require 'rspec'
-require 'cloud_spec'
+require 'cloudformation_rspec'

@@ -1,14 +1,14 @@
 $:.unshift File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |gem|
-  gem.name    = "cloud_spec"
+  gem.name    = "cloudformation_rspec"
   gem.version = "0.0.1"
 
   gem.authors     = ["Patrick Robinson"]
   gem.email       = ["patrick.robinson@envato.com"]
-  gem.description = %q{Cloud Spec}
+  gem.description = %q{CloudFormation RSpec matchers}
   gem.summary     = %q{Test your CloudFormation templates}
-  gem.homepage    = "https://github.com/envato/cloud_spec"
+  gem.homepage    = "https://github.com/envato/cloudformation_rspec"
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map { |f| File.basename(f) }

@@ -35,7 +35,7 @@ describe 'have_change_set_failed' do
   end
 
   after do
-    CloudSpec::ChangeSet.flush_cache
+    CloudFormationRSpec::ChangeSet.flush_cache
   end
 
   context 'a valid cloudformation template' do
@@ -99,8 +99,8 @@ describe 'have_change_set_failed' do
 
     it 'calls create_change_set with the required parameters' do
       expect(cf_stub).to receive(:create_change_set).with(
-        change_set_name: "CloudSpec-#{uuid}",
-        stack_name: "CloudSpec-#{uuid}",
+        change_set_name: "CloudFormationRSpec-#{uuid}",
+        stack_name: "CloudFormationRSpec-#{uuid}",
         change_set_type: 'CREATE',
         template_body: stack[:template_body],
         parameters: [
@@ -137,7 +137,7 @@ describe 'have_change_set_failed' do
     end
 
     it 'raises InvalidSparkleTemplate' do
-      expect { expect(sparkle_stack).to have_change_set_failed }.to raise_error(CloudSpec::ChangeSet::InvalidSparkleTemplate)
+      expect { expect(sparkle_stack).to have_change_set_failed }.to raise_error(CloudFormationRSpec::ChangeSet::InvalidSparkleTemplate)
     end
   end
 
@@ -150,7 +150,7 @@ describe 'have_change_set_failed' do
     end
 
     it 'raises InvalidSparkleTemplate' do
-      expect { expect(sparkle_stack).to have_change_set_failed }.to raise_error(CloudSpec::ChangeSet::InvalidCloudFormationTemplate)
+      expect { expect(sparkle_stack).to have_change_set_failed }.to raise_error(CloudFormationRSpec::ChangeSet::InvalidCloudFormationTemplate)
     end
   end
 

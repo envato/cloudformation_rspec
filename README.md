@@ -1,8 +1,8 @@
-# CloudSpec
+# CloudFormation RSpec
 
 CloudFormation provides a black-box orchestration model; you feed templates in and infrastructure pops out the other end. This is good in that we design our templates without having to understand how the sausage gets made, but we want a way to test, quickly, what it's actually doing is what we expect.
 
-CloudSpec enables us to do that by providing RSpec matchers to enable you to test your templates against the actual CloudFormation APIs to make sure they work.
+CloudFormation RSpec enables us to use RSpec matchers test your templates against the actual CloudFormation APIs without creating actual infrastructure. This is a tradeoff to get faster feedback (typically in under 2 minutes) without waiting for CloudFormation stacks to build and is designed to complement but not replace Acceptance Testing.
 
 ## Usage
 

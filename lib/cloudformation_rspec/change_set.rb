@@ -4,7 +4,7 @@ require 'securerandom'
 require 'digest'
 require 'sparkle_formation'
 
-module CloudSpec::ChangeSet
+module CloudFormationRSpec::ChangeSet
   END_STATES = [
     'CREATE_COMPLETE',
     'DELETE_COMPLETE',
@@ -34,7 +34,6 @@ module CloudSpec::ChangeSet
       raise InvalidCloudFormationTemplate.new("Error compiling template into CloudFormation #{error.message}")
     end
   end
-  
 
   def create_change_set(stack)
     if !stack.is_a?(Hash)
@@ -55,11 +54,11 @@ module CloudSpec::ChangeSet
 
     change_set_hash = generate_change_set_hash(stack)
 
-    if change_set = CloudSpec::ChangeSet.get_from_cache(change_set_hash)
+    if change_set = CloudFormationRSpec::ChangeSet.get_from_cache(change_set_hash)
       return change_set
     end
 
-    change_set_name = "CloudSpec-#{SecureRandom.uuid}"
+    change_set_name = "CloudFormationRSpec-#{SecureRandom.uuid}"
     client = Aws::CloudFormation::Client.new
     change_set_id = client.create_change_set(
       change_set_name: change_set_name,
@@ -77,7 +76,7 @@ module CloudSpec::ChangeSet
     end
     client.delete_change_set(change_set_name: change_set_id)
 
-    CloudSpec::ChangeSet.add_to_cache(change_set_hash, response)
+    CloudFormationRSpec::ChangeSet.add_to_cache(change_set_hash, response)
     response
   end
 
@@ -108,7 +107,7 @@ module CloudSpec::ChangeSet
 end
 
 RSpec::Matchers.define :contain_in_change_set do |resource_type, resource_id|
-  include CloudSpec::ChangeSet
+  include CloudFormationRSpec::ChangeSet
   match do |stack|
     change_set_result = create_change_set(stack)
     if change_set_result.status == 'FAILED'
@@ -134,7 +133,7 @@ RSpec::Matchers.define :contain_in_change_set do |resource_type, resource_id|
 end
 
 RSpec::Matchers.define :have_change_set_failed do
-  include CloudSpec::ChangeSet
+  include CloudFormationRSpec::ChangeSet
   match do |stack|
     change_set_result = create_change_set(stack)
     if change_set_result.status != 'FAILED'

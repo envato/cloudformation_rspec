@@ -11,8 +11,6 @@ class CloudFormationRSpec::ChangeSet
   ]
   WAIT_DELAY = 3
 
-  InvalidSparkleTemplate = Class.new(StandardError)
-  InvalidCloudFormationTemplate = Class.new(StandardError)
   ChangeSetNotComplete = Class.new(StandardError)
 
   @change_set_cache = {}
@@ -29,19 +27,7 @@ class CloudFormationRSpec::ChangeSet
   end
 
   def self.from_sparkleformation_template(sparkle_path:, template_file:, compile_state:, parameters:)
-    begin
-      ::SparkleFormation.sparkle_path = sparkle_path
-      sparkle_template = ::SparkleFormation.compile(File.join(sparkle_path, template_file), :sparkle)
-    rescue => error
-      raise InvalidSparkleTemplate.new("Error compiling template into SparkleTemplate #{error.message}")
-    end
-
-    begin
-      sparkle_template.compile_state = compile_state
-      template_body = sparkle_template.to_json
-    rescue => error
-      raise InvalidCloudFormationTemplate.new("Error compiling template into CloudFormation #{error.message}")
-    end
+    template_body = CloudFormationRSpec::Sparkle.compile_sparkle_template(sparkle_path, template_file, compile_state)
   
     new(template_body: template_body, parameters: parameters).tap { |change_set| change_set.create_change_set }
   end

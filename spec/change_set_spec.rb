@@ -37,29 +37,6 @@ describe CloudFormationRSpec::ChangeSet do
     let(:compile_state) { {} }
     subject { described_class.from_sparkleformation_template(sparkle_path: sparkle_path, template_file: template_file, compile_state: compile_state, parameters: parameters) }
 
-    context 'that doesnt compile to sparkleformation' do
-      before do
-        allow(SparkleFormation).to receive(:compile).and_raise(RuntimeError)
-      end
-  
-      it 'raises InvalidSparkleTemplate' do
-        expect { subject }.to raise_error(CloudFormationRSpec::ChangeSet::InvalidSparkleTemplate)
-      end
-    end
-  
-    context 'that doesnt compile to cloudformation' do
-      let(:sparkle_stub) { instance_double(SparkleFormation) }
-      before do
-        allow(SparkleFormation).to receive(:compile).and_return(sparkle_stub)
-        allow(sparkle_stub).to receive(:compile_state=)
-        allow(sparkle_stub).to receive(:to_json).and_raise(RuntimeError)
-      end
-  
-      it 'raises InvalidCloudFormationTemplate' do
-        expect { subject }.to raise_error(CloudFormationRSpec::ChangeSet::InvalidCloudFormationTemplate)
-      end
-    end
-
     context 'that does compile' do
       let(:sparkle_path) { 'spec/fixtures' }
       let(:template_file) { 'valid_sparkle_vpc_template.rb' }

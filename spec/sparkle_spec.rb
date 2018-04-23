@@ -1,10 +1,9 @@
 require 'spec_helper'
 
 describe CloudFormationRSpec::Sparkle do
-  let(:template_file) { "vpc.rb" }
-  let(:sparkle_path) { "spec/fixtures" }
+  let(:template_file) { File.join("spec", "fixtures", "vpc.rb") }
   let(:compile_state) { {} }
-  subject { described_class.compile_sparkle_template(sparkle_path, template_file, compile_state) }
+  subject { described_class.compile_sparkle_template(template_file, compile_state) }
 
   context 'that doesnt compile to sparkleformation' do
     before do

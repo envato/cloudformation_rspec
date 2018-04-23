@@ -31,15 +31,13 @@ describe CloudFormationRSpec::ChangeSet do
   end
 
   context 'a sparkleformation template' do
-    let(:template_file) { "vpc.rb" }
-    let(:sparkle_path) { "spec/fixtures" }
+    let(:template_file) { File.join("spec", "fixtures", "vpc.rb") }
     let(:parameters) { {} }
     let(:compile_state) { {} }
-    subject { described_class.from_sparkleformation_template(sparkle_path: sparkle_path, template_file: template_file, compile_state: compile_state, parameters: parameters) }
+    subject { described_class.from_sparkleformation_template(template_file: template_file, compile_state: compile_state, parameters: parameters) }
 
     context 'that does compile' do
-      let(:sparkle_path) { 'spec/fixtures' }
-      let(:template_file) { 'valid_sparkle_vpc_template.rb' }
+      let(:template_file) { File.join('spec', 'fixtures', 'valid_sparkle_vpc_template.rb') }
 
       context 'with parameters' do
         let(:parameters) { {"VpcCidr" => "10.0.0.0/16"} }

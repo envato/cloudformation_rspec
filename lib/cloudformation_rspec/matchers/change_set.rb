@@ -4,7 +4,6 @@ module CloudFormationRSpec::Matchers::ChangeSet
   def generate_change_set(stack)
     if stack[:compiler] == :sparkleformation
       CloudFormationRSpec::ChangeSet.from_sparkleformation_template(
-        sparkle_path: stack[:sparkle_path],
         template_file: stack[:template_file],
         compile_state: stack[:compile_state],
         parameters: stack[:parameters]

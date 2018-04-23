@@ -26,8 +26,8 @@ class CloudFormationRSpec::ChangeSet
     new(template_body: template_body, parameters: parameters).tap { |change_set| change_set.create_change_set }
   end
 
-  def self.from_sparkleformation_template(sparkle_path:, template_file:, compile_state:, parameters:)
-    template_body = CloudFormationRSpec::Sparkle.compile_sparkle_template(sparkle_path, template_file, compile_state)
+  def self.from_sparkleformation_template(template_file:, compile_state:, parameters:)
+    template_body = CloudFormationRSpec::Sparkle.compile_sparkle_template(template_file, compile_state)
   
     new(template_body: template_body, parameters: parameters).tap { |change_set| change_set.create_change_set }
   end

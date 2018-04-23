@@ -10,8 +10,7 @@ describe 'have_change_set_failed' do
   }}
   let(:sparkle_stack) {{
     compiler: :sparkleformation,
-    sparkle_path: "templates",
-    template_file: "vpc.rb",
+    template_file: "templates/vpc.rb",
     compile_state: {public_subnets: ["10.0.0.0/24", "10.0.1.0/24"], private_subnets: ["10.0.2.0/24", "10.0.3.0/24"]},
     parameters: {
       "VpcCidr" => "10.0.0.0/16",

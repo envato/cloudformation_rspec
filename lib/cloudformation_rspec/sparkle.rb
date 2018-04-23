@@ -2,11 +2,10 @@ class CloudFormationRSpec::Sparkle
   InvalidSparkleTemplate = Class.new(StandardError)
   InvalidCloudFormationTemplate = Class.new(StandardError)
 
-  def self.compile_sparkle_template(sparkle_path, template_file, compile_state)
+  def self.compile_sparkle_template(template_file, compile_state)
     begin
-      ::SparkleFormation.sparkle_path = sparkle_path
-      sparkle_template = ::SparkleFormation.compile(File.join(sparkle_path, template_file), :sparkle)
-    rescue => error
+      sparkle_template = ::SparkleFormation.compile(template_file, :sparkle)
+    rescue RuntimeError, SyntaxError => error
       raise InvalidSparkleTemplate.new("Error compiling template into SparkleTemplate #{error.message}")
     end
 

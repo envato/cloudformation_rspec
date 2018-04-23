@@ -17,13 +17,15 @@ class CloudFormationRSpec::ChangeSet
 
   @change_set_cache = {}
 
+  attr_reader :changes, :status
+
   def initialize(template_body:, parameters: {})
     @template_body = template_body
     @parameters = parameters ? parameters : {}
   end
 
   def self.from_cloudformation_template(template_body:, parameters:)
-    new(template_body: template_body, parameters: parameters).create_change_set
+    new(template_body: template_body, parameters: parameters).tap { |change_set| change_set.create_change_set }
   end
 
   def self.from_sparkleformation_template(sparkle_path:, template_file:, compile_state:, parameters:)
@@ -41,7 +43,7 @@ class CloudFormationRSpec::ChangeSet
       raise InvalidCloudFormationTemplate.new("Error compiling template into CloudFormation #{error.message}")
     end
   
-    new(template_body: template_body, parameters: parameters).create_change_set
+    new(template_body: template_body, parameters: parameters).tap { |change_set| change_set.create_change_set }
   end
 
   def create_change_set
@@ -51,7 +53,6 @@ class CloudFormationRSpec::ChangeSet
       return change_set
     end
 
-    change_set_name = "CloudFormationRSpec-#{SecureRandom.uuid}"
     client = Aws::CloudFormation::Client.new
     change_set = client.create_change_set(
       change_set_name: change_set_name,
@@ -60,21 +61,26 @@ class CloudFormationRSpec::ChangeSet
       template_body: @template_body,
       parameters: flat_parameters
     )
-    change_set_id = change_set.id
-    if wait_change_set_complete(client, change_set_id)
-      client.delete_stack(stack_name: change_set_id)
+    @change_set_id = change_set.id
+    if wait_change_set_complete(client, @change_set_id)
+      client.delete_stack(stack_name: @change_set_id)
     end
-    response = client.describe_change_set(change_set_name: change_set_id, stack_name: change_set_name)
+    response = client.describe_change_set(change_set_name: @change_set_id, stack_name: change_set_name)
     if !END_STATES.include? response.status
       raise ChangeSetNotComplete.new("Change set did not complete in time. #{response.status}")
     end
-    client.delete_change_set(change_set_name: change_set_id)
-
+    @status = response.status
+    @changes = response.changes.map { |change| CloudFormationRSpec::ResourceChange.new(change.resource_change.resource_type, change.resource_change.logical_resource_id) }
+    client.delete_change_set(change_set_name: @change_set_id)
     self.class.add_to_cache(change_set_hash, response)
     response
   end
 
   private
+
+  def change_set_name
+    @change_set_name ||= "CloudFormationRSpec-#{SecureRandom.uuid}"
+  end
 
   def flat_parameters
     @parameters.map { |k, v| {parameter_key: k, parameter_value: v} }

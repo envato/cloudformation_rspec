@@ -154,17 +154,11 @@ describe 'have_change_set_failed' do
     end
   end
 
-  context 'an valid sparkleformation template' do
-    let(:template_body) { 'SparkleFormation.new(:vpc) do
-      resources.vpc do
-        type "AWS::EC2::VPC"
-        properties do
-          cidr "10.0.0.0/16"
-        end
-      end
-    end' }
+  context 'a valid sparkleformation template' do
+    let(:sparkle_path) { 'spec/fixtures' }
+    let(:template_file) { 'valid_sparkle_vpc_template.rb' }
+
     before do
-      allow(File).to receive(:read).with("template/vpc.rb").and_return(template_body)
       allow(cf_stub).to receive(:wait_until).and_return(true)
       allow(change_set_mock).to receive(:status).and_return("CREATE_COMPLETE")
       allow(change_set_mock).to receive(:changes).and_return([vpc_change_mock, web_server_change_mock])
@@ -176,8 +170,41 @@ describe 'have_change_set_failed' do
       allow(vpc_resource_change_mock).to receive(:logical_resource_id).and_return("vpc")
     end
 
-    it 'succeeds when there is a matching resource' do
-      expect(stack).to contain_in_change_set("AWS::EC2::VPC", "vpc")
+    context 'with parameters' do
+      let(:sparkle_stack) {{
+        compiler: :sparkleformation,
+        sparkle_path: sparkle_path,
+        template_file: template_file,
+        parameters: {
+          "VpcCidr" => "10.0.0.0/16",
+        }
+      }}
+      it 'succeeds when there is a matching resource' do
+        expect(sparkle_stack).to contain_in_change_set("AWS::EC2::VPC", "vpc")
+      end
+    end
+
+    context 'with compile state' do
+      let(:sparkle_stack) {{
+        compiler: :sparkleformation,
+        sparkle_path: sparkle_path,
+        template_file: template_file,
+        compile_state: {public_subnets: ["10.0.0.0/24", "10.0.1.0/24"], private_subnets: ["10.0.2.0/24", "10.0.3.0/24"]}
+      }}
+      it 'succeeds when there is a matching resource' do
+        expect(sparkle_stack).to contain_in_change_set("AWS::EC2::VPC", "vpc")
+      end
+    end
+
+    context 'with no parameters or compile state' do
+      let(:sparkle_stack) {{
+        compiler: :sparkleformation,
+        sparkle_path: sparkle_path,
+        template_file: template_file,
+      }}
+      it 'succeeds when there is a matching resource' do
+        expect(sparkle_stack).to contain_in_change_set("AWS::EC2::VPC", "vpc")
+      end
     end
   end
 end

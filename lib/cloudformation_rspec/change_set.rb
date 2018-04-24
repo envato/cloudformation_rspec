@@ -36,6 +36,8 @@ class CloudFormationRSpec::ChangeSet
     change_set_hash = generate_change_set_hash
 
     if change_set = self.class.get_from_cache(change_set_hash)
+      @status = change_set.status
+      @changes = change_set.changes.map { |change| CloudFormationRSpec::ResourceChange.new(change.resource_change.resource_type, change.resource_change.logical_resource_id) }
       return change_set
     end
 

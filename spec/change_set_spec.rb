@@ -63,6 +63,7 @@ describe CloudFormationRSpec::ChangeSet do
 
   context 'a valid change set' do
     subject(:subject_default) { described_class.new(template_body: template_body, parameters: parameters) }
+    subject(:cached_subject_default) { described_class.new(template_body: template_body, parameters: parameters) }
     subject(:different_parameters) { described_class.new(template_body: template_body, parameters: {}) }
     subject(:different_template) { described_class.new(template_body: "{}", parameters: parameters) }
 
@@ -85,7 +86,19 @@ describe CloudFormationRSpec::ChangeSet do
     it 'caches the change set between runs' do
       expect(cf_stub).to receive(:create_change_set).once
       subject_default.create_change_set
+      cached_subject_default.create_change_set
+    end
+
+    it 'restores the status from the cached run' do
       subject_default.create_change_set
+      cached_subject_default.create_change_set
+      expect(cached_subject_default.status).to eq("CREATE_COMPLETE")
+    end
+
+    it 'restores the changes from the cached run' do
+      subject_default.create_change_set
+      cached_subject_default.create_change_set
+      expect(cached_subject_default.changes).to match_array([CloudFormationRSpec::ResourceChange.new("AWS::EC2::VPC", "Foo")])
     end
 
     it 'does not cache change sets when parameters are different' do

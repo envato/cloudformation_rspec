@@ -18,6 +18,10 @@ describe 'vpc_template' do
     }
   }
 
+  it 'is valid' do
+    expect(template_json).to be_valid
+  end
+
   context 'with a valid cidr' do
     let(:cidr) { "10.0.0.0/16" }
 
@@ -48,6 +52,10 @@ describe 'vpc_template' do
       "VpcCidr" => cidr,
     }
   }
+
+  it 'is valid' do
+    expect(stack).to be_valid_sparkleformation
+  end
 
   context 'with a valid cidr' do
     let(:cidr) { "10.0.0.0/16" }

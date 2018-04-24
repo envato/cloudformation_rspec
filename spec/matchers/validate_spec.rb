@@ -30,6 +30,12 @@ end
 
 describe 'be_valid_sparkleformation' do
   let(:cf_stub) { instance_double(Aws::CloudFormation::Client) }
+  let(:compile_state) { {} }
+  let(:stack) {{
+    compiler: :sparkleformation,
+    template_file: template_file,
+    compile_state: compile_state
+  }}
   before do
     allow(Aws::CloudFormation::Client).to receive(:new).and_return(cf_stub)
   end
@@ -41,7 +47,7 @@ describe 'be_valid_sparkleformation' do
     end
 
     it 'succeeds' do
-      expect(template_file).to be_valid_sparkleformation
+      expect(stack).to be_valid_sparkleformation
     end
   end
 
@@ -52,7 +58,7 @@ describe 'be_valid_sparkleformation' do
     end
 
     it 'fails' do
-      expect(template_file).not_to be_valid_sparkleformation
+      expect(stack).not_to be_valid_sparkleformation
     end
   end
 
@@ -64,7 +70,19 @@ describe 'be_valid_sparkleformation' do
 
     it 'fails' do
       expect(cf_stub).not_to receive(:validate_template)
-      expect(template_file).not_to be_valid_sparkleformation
+      expect(stack).not_to be_valid_sparkleformation
+    end
+  end
+
+  context 'the stack has compile time parameters' do
+    let(:template_file) { File.join('spec', 'fixtures', 'template_with_compile_parameters.rb') }
+    let(:compile_state) { {vpc_cidr: "10.0.0.0/16"} }
+    before do
+      allow(cf_stub).to receive(:validate_template)
+    end
+
+    it 'succeed' do
+      expect(stack).to be_valid_sparkleformation
     end
   end
 end

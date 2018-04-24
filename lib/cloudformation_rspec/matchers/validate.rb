@@ -27,9 +27,15 @@ end
 
 RSpec::Matchers.define :be_valid_sparkleformation do
   include CloudFormationRSpec::Matchers::Validate
-  match do |template_file|
+  match do |stack|
+    if !stack.is_a?(Hash) || !stack[:template_file]
+      raise ArgumentError, "You must pass a hash to this expectation with at least the :template_file option"
+    end
+
+    stack[:compile_state] ||= {}
+
     begin
-      template_body = CloudFormationRSpec::Sparkle.compile_sparkle_template(template_file, {})
+      template_body = CloudFormationRSpec::Sparkle.compile_sparkle_template(stack[:template_file], stack[:compile_state])
     rescue CloudFormationRSpec::Sparkle::InvalidTemplate => error
       @error = error
       return false

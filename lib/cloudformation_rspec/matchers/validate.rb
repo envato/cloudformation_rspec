@@ -30,7 +30,7 @@ RSpec::Matchers.define :be_valid_sparkleformation do
   match do |template_file|
     begin
       template_body = CloudFormationRSpec::Sparkle.compile_sparkle_template(template_file, {})
-    rescue CloudFormationRSpec::Sparkle::InvalidSparkleTemplate, CloudFormationRSpec::Sparkle::InvalidCloudFormationTemplate => error
+    rescue CloudFormationRSpec::Sparkle::InvalidTemplate => error
       @error = error
       return false
     end

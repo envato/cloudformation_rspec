@@ -1,6 +1,7 @@
 class CloudFormationRSpec::Sparkle
-  InvalidSparkleTemplate = Class.new(StandardError)
-  InvalidCloudFormationTemplate = Class.new(StandardError)
+  InvalidTemplate = Class.new(StandardError)
+  InvalidSparkleTemplate = Class.new(InvalidTemplate)
+  InvalidCloudFormationTemplate = Class.new(InvalidTemplate)
 
   def self.compile_sparkle_template(template_file, compile_state)
     begin

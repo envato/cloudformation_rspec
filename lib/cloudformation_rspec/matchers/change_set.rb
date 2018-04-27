@@ -44,8 +44,10 @@ RSpec::Matchers.define :contain_in_change_set do |resource_type, resource_id|
     end
 
     if !change_set_result.changes.any? { |change| change.logical_resource_id == resource_id }
-      @error = "Change set does not include a resource type #{resource_type} with the id #{resource_id}
-      Found the following resources with the same Resource Type:\n#{resource_ids_with_resource_type(change_set_result, resource_type)}"
+      @error = %Q(
+Change set does not include a resource type #{resource_type} with the id #{resource_id}
+Found the following resources with the same Resource Type:\n#{resource_ids_with_resource_type(change_set_result, resource_type).join("\n")}
+      )
       return false
     end
     true

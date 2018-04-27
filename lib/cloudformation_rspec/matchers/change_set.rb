@@ -15,6 +15,12 @@ module CloudFormationRSpec::Matchers::ChangeSet
       CloudFormationRSpec::ChangeSet.from_cloudformation_template(template_body: stack[:template_body], parameters: stack[:parameters])
     end
   end
+
+  def resource_ids_with_resource_type(change_set_result, resource_type)
+    change_set_result.changes.select do |change|
+      change.resource_type == resource_type
+    end.map(&:logical_resource_id)
+  end
 end
 
 RSpec::Matchers.define :contain_in_change_set do |resource_type, resource_id|
@@ -38,7 +44,8 @@ RSpec::Matchers.define :contain_in_change_set do |resource_type, resource_id|
     end
 
     if !change_set_result.changes.any? { |change| change.logical_resource_id == resource_id }
-      @error = "Change set does not include a resource type #{resource_type} with the id #{resource_id}"
+      @error = "Change set does not include a resource type #{resource_type} with the id #{resource_id}
+      Found the following resources with the same Resource Type:\n#{resource_ids_with_resource_type(change_set_result, resource_type)}"
       return false
     end
     true

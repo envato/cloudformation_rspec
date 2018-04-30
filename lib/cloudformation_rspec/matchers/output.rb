@@ -1,6 +1,10 @@
-RSpec::Matchers.define :have_output_including do |output_name|
-  match do |stack|
-    if !stack.is_a?(Hash) || !stack[:template_file]
+require 'json'
+require 'yaml'
+
+module CloudFormationRSpec::Matchers::Output
+
+  def validate_sparkleformation_template_has_output(stack, output_name)
+    if !stack[:template_file]
       raise ArgumentError, "You must pass a hash to this expectation with at least the :template_file option"
     end
 
@@ -14,6 +18,11 @@ RSpec::Matchers.define :have_output_including do |output_name|
     end
 
     template = JSON.load(template_body)
+
+    validate_template_has_output(template, output_name)
+  end
+
+  def validate_template_has_output(template, output_name)
     if template["Outputs"].nil?
       @error = "No output found in template"
       return false
@@ -28,6 +37,43 @@ No output named #{output_name} in the list of outputs:
       return false
     end
     true
+  end
+end
+
+RSpec::Matchers.define :have_output_including do |output_name|
+  include CloudFormationRSpec::Matchers::Output
+  match do |stack|
+    if stack.is_a?(Hash) && stack[:compiler] == :sparkleformation
+      return validate_sparkleformation_template_has_output(stack, output_name)
+    end
+
+    if !stack.is_a?(String)
+      raise ArgumentError, "You must pass a hash for SparkleFormation templates, or a string for YAML/JSON templates"
+    end
+
+    json_load = false
+    yaml_load = false
+    begin
+      template = JSON.load(stack)
+      return validate_template_has_output(template, output_name)
+    rescue JSON::ParserError => error
+      json_error = error
+    else
+      json_load = true
+    end
+
+    if !json_load
+      begin
+        template = YAML.load(stack)
+        return validate_template_has_output(template, output_name)
+      rescue Psych::SyntaxError => error
+        yaml_error = error
+      else
+        yaml_load = true
+      end
+    end
+
+    raise ArgumentError, "Unable to parse template as either YAML or JSON. Errors are:\nJson #{json_error}\nYaml #{yaml_error}"
   end
 
   failure_message do

@@ -21,4 +21,35 @@ describe 'have_output_including' do
       expect(stack).not_to have_output_including("SubnetId")
     end
   end
+
+  context 'yaml template' do
+    let(:template_body) { File.read(File.join('spec', 'fixtures', 'valid_vpc_template.yml')) }
+
+    it 'has a vpc_id output' do
+      expect(template_body).to have_output_including("VpcId")
+    end
+
+    it 'does not have vpc_cidr output' do
+      expect(template_body).not_to have_output_including("VpcCidr")
+    end
+  end
+
+  context 'json template' do
+    let(:template_body) { File.read(File.join('spec', 'fixtures', 'valid_vpc_template.json')) }
+
+    it 'has a vpc_id output' do
+      expect(template_body).to have_output_including("VpcId")
+    end
+
+    it 'does not have vpc_cidr output' do
+      expect(template_body).not_to have_output_including("VpcCidr")
+    end
+  end
+
+  context 'garbage template' do
+    let(:template_body) { '   {lkajdflkasdjf' }
+    it 'raises an ArgumentError' do
+      expect{ expect(template_body).to have_output_including("VpcId") }.to raise_error(ArgumentError)
+    end
+  end
 end

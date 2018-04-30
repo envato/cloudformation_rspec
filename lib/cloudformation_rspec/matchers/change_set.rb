@@ -1,4 +1,4 @@
-require 'rspec'
+require 'aws-sdk-cloudformation'
 
 module CloudFormationRSpec::Matchers::ChangeSet
   def generate_change_set(stack)

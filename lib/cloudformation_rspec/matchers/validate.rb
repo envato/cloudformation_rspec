@@ -1,4 +1,3 @@
-require 'rspec'
 require 'aws-sdk-cloudformation'
 
 module CloudFormationRSpec::Matchers::Validate

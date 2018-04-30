@@ -5,4 +5,16 @@ SparkleFormation.new(:vpc) do
       cidr "10.0.0.0/16"
     end
   end
+
+  outputs do
+    vpc_id do
+      value ref!(:vpc)
+      description "The VPC ID"
+    end
+
+    vpc_cidr do
+      value "10.0.0.0/16"
+      description "The VPC CIDR"
+    end
+  end
 end

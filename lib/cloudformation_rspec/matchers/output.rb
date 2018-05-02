@@ -51,26 +51,18 @@ RSpec::Matchers.define :have_output_including do |output_name|
       raise ArgumentError, "You must pass a hash for SparkleFormation templates, or a string for YAML/JSON templates"
     end
 
-    json_load = false
-    yaml_load = false
     begin
       template = JSON.load(stack)
       return validate_template_has_output(template, output_name)
     rescue JSON::ParserError => error
       json_error = error
-    else
-      json_load = true
     end
 
-    if !json_load
-      begin
-        template = YAML.load(stack)
-        return validate_template_has_output(template, output_name)
-      rescue Psych::SyntaxError => error
-        yaml_error = error
-      else
-        yaml_load = true
-      end
+    begin
+      template = YAML.load(stack)
+      return validate_template_has_output(template, output_name)
+    rescue Psych::SyntaxError => error
+      yaml_error = error
     end
 
     raise ArgumentError, "Unable to parse template as either YAML or JSON. Errors are:\nJson #{json_error}\nYaml #{yaml_error}"

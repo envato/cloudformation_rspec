@@ -44,12 +44,16 @@ describe 'have_output_including' do
     it 'does not have vpc_cidr output' do
       expect(template_body).not_to have_output_including("VpcCidr")
     end
+
+    it 'provides a diff of the outputs' do
+      expect { expect(template_body).not_to have_output_including("VpcId") }.to raise_error(RSpec::Expectations::ExpectationNotMetError, 'expected ["VpcId"] not to have output including "VpcId"')
+    end
   end
 
   context 'garbage template' do
     let(:template_body) { '   {lkajdflkasdjf' }
     it 'raises an ArgumentError' do
-      expect{ expect(template_body).to have_output_including("VpcId") }.to raise_error(ArgumentError)
+      expect{ expect(template_body).to have_output_including("VpcId") }.to raise_error(SyntaxError)
     end
   end
 end

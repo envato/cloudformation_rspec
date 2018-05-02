@@ -78,7 +78,8 @@ describe CloudFormationRSpec::ChangeSet do
             parameter_key:  "VpcCidr",
             parameter_value: "10.0.0.0/16"
           }
-        ]
+        ],
+        capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'],
       )
       subject_default.create_change_set
     end

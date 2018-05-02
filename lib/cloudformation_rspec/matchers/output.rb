@@ -2,29 +2,14 @@ require 'json'
 require 'yaml'
 
 RSpec::Matchers.define :have_output_including do |output_name|
-  define_method :sparkle_template_outputs do |stack|
+  define_method :json_template? do |template_body|
+    template_body =~ /^{/x # ignore leading whitespaces
+  end
+
+  define_method :sparkle_template do |stack|
     stack[:compile_state] ||= {}
-  
-    begin
-      template_body = CloudFormationRSpec::Sparkle.compile_sparkle_template(stack[:template_file], stack[:compile_state])
-    rescue CloudFormationRSpec::Sparkle::InvalidTemplate => error
-      @error = error
-      return false
-    end
 
-    template = JSON.load(template_body)
-
-    template["Outputs"].nil? ? [] : template["Outputs"].keys
-  end
-
-  define_method :json_template_outputs do |template|
-    template = JSON.load(template)
-    template["Outputs"].nil? ? [] : template["Outputs"].keys
-  end
-
-  define_method :yaml_template_outputs do |template|
-    template = YAML.load(template)
-    template["Outputs"].nil? ? [] : template["Outputs"].keys
+    CloudFormationRSpec::Sparkle.compile_sparkle_template(stack[:template_file], stack[:compile_state])
   end
 
   match do |stack|
@@ -32,26 +17,31 @@ RSpec::Matchers.define :have_output_including do |output_name|
       if !stack[:template_file]
         raise ArgumentError, "You must pass a hash to this expectation with at least the :template_file option"
       end
-      outputs = sparkle_template_outputs(stack)
+
+      begin
+        template = sparkle_template(stack)
+      rescue CloudFormationRSpec::Sparkle::InvalidTemplate => error
+        raise SyntaxError, "Unable to parse SparkleFormation template #{error}"
+      end
     elsif !stack.is_a?(String)
       raise ArgumentError, "You must pass a hash for SparkleFormation templates, or a string for YAML/JSON templates"
     else
-      begin
-        outputs = json_template_outputs(stack)
-      rescue JSON::ParserError => error
-        json_error = error
-      end
+      template = stack
+    end
   
-      begin
-        outputs = yaml_template_outputs(stack)
-      rescue Psych::SyntaxError => error
-        yaml_error = error
-      end  
+    if json_template?(template)
+      decode_function = lambda { |tmpl| JSON.load(tmpl) }
+    else
+      decode_function = lambda { |tmpl| YAML.load(tmpl) }
     end
 
-    if outputs.nil?
-      raise ArgumentError, "Unable to parse template as either YAML or JSON. Errors are:\nJson #{json_error}\nYaml #{yaml_error}"
+    begin
+      template = decode_function.call(template)
+    rescue JSON::ParserError, Psych::SyntaxError => error
+      raise SyntaxError, "Unable to parse template as either YAML or JSON. Got #{error}"
     end
+    outputs = template["Outputs"].nil? ? [] : template["Outputs"].keys
+
     @actual = outputs
     outputs.include?(output_name)
   end

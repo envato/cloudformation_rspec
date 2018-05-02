@@ -53,7 +53,7 @@ describe 'have_output_including' do
   context 'garbage template' do
     let(:template_body) { '   {lkajdflkasdjf' }
     it 'raises an ArgumentError' do
-      expect{ expect(template_body).to have_output_including("VpcId") }.to raise_error(ArgumentError)
+      expect{ expect(template_body).to have_output_including("VpcId") }.to raise_error(SyntaxError)
     end
   end
 end

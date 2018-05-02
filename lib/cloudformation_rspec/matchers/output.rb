@@ -25,7 +25,7 @@ RSpec::Matchers.define :have_output_including do |output_name|
     elsif json_template?(input)
       decode_function = lambda { |tmpl| JSON.load(tmpl) }
     else
-      decode_function = lambda { |tmpl| YAML.load(tmpl) }
+      decode_function = lambda { |tmpl| YAML.safe_load(tmpl) }
     end
 
     begin

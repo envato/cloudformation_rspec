@@ -47,7 +47,8 @@ class CloudFormationRSpec::ChangeSet
       stack_name: change_set_name,
       change_set_type: 'CREATE',
       template_body: @template_body,
-      parameters: flat_parameters
+      parameters: flat_parameters,
+      capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'],
     )
     @change_set_id = change_set.id
     if wait_change_set_complete(client, @change_set_id)

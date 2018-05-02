@@ -3,7 +3,7 @@ require 'yaml'
 
 RSpec::Matchers.define :have_output_including do |output_name|
   def json_template?(template_body)
-    template_body =~ /^{/x # ignore leading whitespaces
+    template_body =~ /^\s*{/ # ignore leading whitespaces
   end
 
   def compile_sparkle_template(stack)
@@ -15,7 +15,7 @@ RSpec::Matchers.define :have_output_including do |output_name|
 
   match do |input|
     if input.is_a?(Hash) && input[:compiler] == :sparkleformation
-      if !input[:template_file]
+      unless input[:template_file]
         raise ArgumentError, "You must pass a hash to this expectation with at least the :template_file option"
       end
 

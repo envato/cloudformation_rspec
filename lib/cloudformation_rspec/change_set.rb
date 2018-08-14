@@ -81,7 +81,7 @@ class CloudFormationRSpec::ChangeSet
   end
 
   def wait_change_set_review(client, change_set_id)
-    client.wait_until(:stack_exists, {stack_name: change_set_id}, {delay: WAIT_DELAY})
+    #client.wait_until(:stack_exists, {stack_name: change_set_id}, {delay: WAIT_DELAY})
     retries = 10
     while retries > 0 do
       resp = client.describe_stacks(stack_name: change_set_id)

@@ -80,20 +80,10 @@ class CloudFormationRSpec::ChangeSet
     @parameters.map { |k, v| {parameter_key: k, parameter_value: v} }
   end
 
-  def wait_change_set_review(client, change_set_id)
-    client.wait_until(:stack_exists, {stack_name: change_set_id}, {delay: WAIT_DELAY})
-    retries = 10
-    while retries > 0 do
-      resp = client.describe_stacks(stack_name: change_set_id)
-      if resp.stacks.first.stack_status == 'REVIEW_IN_PROGRESS'
-        puts "Stack in review"
-        return true
-      end
-      retries--
-      sleep(WAIT_DELAY)
-    end
-    false
-  rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError, Aws::CloudFormation::Errors::ValidationError => e
+  def wait_change_set_review(client, change_set_name)
+    client.wait_until(:stack_exists, {stack_name: change_set_name}, {delay: WAIT_DELAY})
+    client.wait_until(:change_set_create_complete, {change_set_name: change_set_name, stack_name: change_set_name}, {delay: WAIT_DELAY})
+  rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError => e
     puts "Waiter failed #{e} for #{change_set_id}"
     false
   end

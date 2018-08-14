@@ -51,7 +51,7 @@ class CloudFormationRSpec::ChangeSet
       capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'],
     )
     @change_set_id = change_set.id
-    wait_change_set_review(client, @change_set_id)
+    stack_created = wait_change_set_review(client, @change_set_id)
     response = client.describe_change_set(change_set_name: @change_set_id, stack_name: change_set_name)
     if !END_STATES.include? response.status
       raise ChangeSetNotComplete.new("Change set did not complete in time. #{response.status}")
@@ -59,7 +59,7 @@ class CloudFormationRSpec::ChangeSet
     @status = response.status
     @changes = response.changes.map { |change| CloudFormationRSpec::ResourceChange.new(change.resource_change.resource_type, change.resource_change.logical_resource_id) }
     client.delete_change_set(change_set_name: @change_set_id)
-    client.delete_stack(stack_name: @change_set_id)
+    client.delete_stack(stack_name: @change_set_id) if stack_created
     self.class.add_to_cache(change_set_hash, response)
     response
   end
@@ -77,17 +77,15 @@ class CloudFormationRSpec::ChangeSet
   def wait_change_set_review(client, change_set_id)
     client.wait_until(:stack_exists, {stack_name: change_set_id}, {delay: WAIT_DELAY})
     retries = 10
-    while do
+    while retries > 0 do
       resp = client.describe_stacks(stack_name: change_set_id)
       if resp.stacks.first.stack_status == 'REVIEW_IN_PROGRESS'
         return true
       end
       retries--
-      if retries <= 0
-        return false
-      end
-      sleep WAIT_DELAY
+      sleep(WAIT_DELAY)
     end
+    false
   rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError
     false
   end

@@ -6,6 +6,8 @@ describe CloudFormationRSpec::ChangeSet do
   let(:cf_stub) { instance_double(Aws::CloudFormation::Client) }
   let(:change_set_mock) { instance_double(Aws::CloudFormation::Types::DescribeChangeSetOutput) }
   let(:change_set_create_mock) { instance_double(Aws::CloudFormation::Types::CreateChangeSetOutput) }
+  let(:stacks_mock) { instance_double(Aws::CloudFormation::Types::DescribeStacksOutput) }
+  let(:stack_mock) { instance_double(Aws::CloudFormation::Types::Stack) }
   let(:aws_change_mock) { instance_double(Aws::CloudFormation::Types::Change) }
   let(:aws_resource_change_mock) { instance_double(Aws::CloudFormation::Types::ResourceChange) }
   let(:uuid) { "a7ad0965-7395-4660-b607-47b13b1d16c2" }
@@ -17,10 +19,13 @@ describe CloudFormationRSpec::ChangeSet do
     allow(cf_stub).to receive(:delete_stack)
     allow(cf_stub).to receive(:delete_change_set)
     allow(cf_stub).to receive(:describe_change_set).and_return(change_set_mock)
+    allow(cf_stub).to receive(:describe_stacks).and_return(stacks_mock)
     allow(cf_stub).to receive(:wait_until).and_return(true)
     allow(change_set_mock).to receive(:status).and_return("CREATE_COMPLETE")
     allow(change_set_mock).to receive(:changes).and_return([aws_change_mock])
     allow(aws_change_mock).to receive(:resource_change).and_return(aws_resource_change_mock)
+    allow(stacks_mock).to receive(:stacks).and_return([stack_mock])
+    allow(stack_mock).to receive(:stack_status).and_return("REVIEW_IN_PROGRESS")
     allow(aws_resource_change_mock).to receive(:resource_type).and_return("AWS::EC2::VPC")
     allow(aws_resource_change_mock).to receive(:logical_resource_id).and_return("Foo")
     allow(SecureRandom).to receive(:uuid).and_return(uuid)

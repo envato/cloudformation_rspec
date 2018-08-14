@@ -51,7 +51,7 @@ class CloudFormationRSpec::ChangeSet
       capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'],
     )
     @change_set_id = change_set.id
-    stack_created = wait_change_set_review(client, @change_set_id)
+    stack_created = wait_change_set_review(client, change_set_name)
     response = client.describe_change_set(change_set_name: @change_set_id, stack_name: change_set_name)
     if !END_STATES.include? response.status
       raise ChangeSetNotComplete.new("Change set did not complete in time. #{response.status}")
@@ -81,7 +81,7 @@ class CloudFormationRSpec::ChangeSet
   end
 
   def wait_change_set_review(client, change_set_id)
-    #client.wait_until(:stack_exists, {stack_name: change_set_id}, {delay: WAIT_DELAY})
+    client.wait_until(:stack_exists, {stack_name: change_set_id}, {delay: WAIT_DELAY})
     retries = 10
     while retries > 0 do
       resp = client.describe_stacks(stack_name: change_set_id)
@@ -94,7 +94,7 @@ class CloudFormationRSpec::ChangeSet
     end
     false
   rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError, Aws::CloudFormation::Errors::ValidationError => e
-    puts "Waiter failed #{e}"
+    puts "Waiter failed #{e} for #{change_set_id}"
     false
   end
 

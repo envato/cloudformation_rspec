@@ -58,9 +58,9 @@ class CloudFormationRSpec::ChangeSet
     end
     @status = response.status
     @changes = response.changes.map { |change| CloudFormationRSpec::ResourceChange.new(change.resource_change.resource_type, change.resource_change.logical_resource_id) }
-    client.delete_change_set(change_set_name: @change_set_id)
+    client.delete_change_set(change_set_name: change_set_name)
     if stack_created
-      resp = client.delete_stack(stack_name: @change_set_id)
+      resp = client.delete_stack(stack_name: change_set_name)
       puts "Deleted stack: #{resp}"
     else
       puts "Stack not created so not deleting it"

@@ -59,7 +59,13 @@ class CloudFormationRSpec::ChangeSet
     @status = response.status
     @changes = response.changes.map { |change| CloudFormationRSpec::ResourceChange.new(change.resource_change.resource_type, change.resource_change.logical_resource_id) }
     client.delete_change_set(change_set_name: @change_set_id)
-    client.delete_stack(stack_name: @change_set_id) if stack_created
+    if stack_created
+      resp = client.delete_stack(stack_name: @change_set_id)
+      puts "Deleted stack: #{resp}"
+    else
+      puts "Stack not created so not deleting it"
+    end
+
     self.class.add_to_cache(change_set_hash, response)
     response
   end
@@ -80,13 +86,15 @@ class CloudFormationRSpec::ChangeSet
     while retries > 0 do
       resp = client.describe_stacks(stack_name: change_set_id)
       if resp.stacks.first.stack_status == 'REVIEW_IN_PROGRESS'
+        puts "Stack in review"
         return true
       end
       retries--
       sleep(WAIT_DELAY)
     end
     false
-  rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError
+  rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError => e
+    puts "Waiter failed #{e}"
     false
   end
 

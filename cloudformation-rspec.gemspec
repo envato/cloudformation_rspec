@@ -2,7 +2,7 @@ $:.unshift File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |gem|
   gem.name    = "cloudformation_rspec"
-  gem.version = "0.0.5"
+  gem.version = "0.0.6.pre"
 
   gem.authors     = ["Patrick Robinson"]
   gem.email       = ["patrick.robinson@envato.com"]

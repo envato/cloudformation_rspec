@@ -93,7 +93,7 @@ class CloudFormationRSpec::ChangeSet
       sleep(WAIT_DELAY)
     end
     false
-  rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError => e
+  rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError, Aws::CloudFormation::Errors::ValidationError => e
     puts "Waiter failed #{e}"
     false
   end

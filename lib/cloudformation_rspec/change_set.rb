@@ -81,10 +81,11 @@ class CloudFormationRSpec::ChangeSet
   end
 
   def wait_change_set_review(client, change_set_name)
+    puts "Change set/stack name #{change_set_name}"
     client.wait_until(:stack_exists, {stack_name: change_set_name}, {delay: WAIT_DELAY})
     client.wait_until(:change_set_create_complete, {change_set_name: change_set_name, stack_name: change_set_name}, {delay: WAIT_DELAY})
   rescue Aws::Waiters::Errors::WaiterFailed, Aws::Waiters::Errors::TooManyAttemptsError => e
-    puts "Waiter failed #{e} for #{change_set_id}"
+    puts "Waiter failed #{e}"
     false
   end
 

@@ -75,6 +75,25 @@ describe 'vpc_template' do
 end
 ```
 
+## Development Status
+
+In production use
+
+## Maintainers
+
+Patrick Robinson (@patrobinson)
+
 ## Limitations
 
 Currently we don't support templates larger than 51,200 bytes, as this requires uploading the template to S3 first.
+
+## Contributing
+
+For bug fixes, documentation changes, and small features:  
+1. Fork it ( https://github.com/envato/cloudformation_rspec/fork )  
+2. Create your feature branch (`git checkout -b my-new-feature`)  
+3. Commit your changes (`git commit -am 'Add some feature'`)  
+4. Push to the branch (`git push origin my-new-feature`)  
+5. Create a new Pull Request  
+
+For larger new features: Do everything as above, but first also make contact with the project maintainers to be sure your change fits with the project direction and you won't be wasting effort going in the wrong direction

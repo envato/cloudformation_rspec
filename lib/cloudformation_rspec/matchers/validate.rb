@@ -17,7 +17,7 @@ module CloudFormationRSpec::Matchers::Validate
     # Issue a warning if cfn-lint is not installed, but pass the test
     unless cfn_lint_available
       warn "Failed to run cfn-lint, do you have it installed and available in $PATH?"
-      true
+      return true
     end
 
     Tempfile.open(['cfn-lint', '.json']) do |f|

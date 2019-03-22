@@ -11,12 +11,12 @@ CloudFormation RSpec enables us to use RSpec matchers test your templates agains
 ```ruby
 describe 'vpc_template' do
   let(:template_json) { File.read('fixtures/vpc.json') }
-  let(:stack) {
+  let(:stack) {{
     template_body: template_json,
     parameters: {
       "VpcCidr" => cidr,
     }
-  }
+  }}
 
   it 'is valid' do
     expect(template_json).to be_valid

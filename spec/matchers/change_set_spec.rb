@@ -51,6 +51,7 @@ describe 'contain_in_change_set' do
     it 'fails when there is no matching resource type' do
       expect(stack).not_to contain_in_change_set("AWS::EC2::Foo", "vpc")
     end
+
   end
 
   context 'an invalid sparkleformation template' do
@@ -67,6 +68,17 @@ describe 'contain_in_change_set' do
 
     it 'fails' do
       expect { expect(stack).not_to contain_in_change_set("AWS::EC2::Foo", "vpc") }.to raise_error(CloudFormationRSpec::Sparkle::InvalidSparkleTemplate)
+    end
+  end
+
+  context 'a stack that fails to generate a change set' do
+    before do
+      allow(change_set_mock).to receive(:status).and_return("FAILED")
+      allow(change_set_mock).to receive(:status_reason).and_return("failed")
+    end
+
+    it 'fails' do
+     expect(stack).not_to contain_in_change_set("AWS::EC2::VPC", "Foo")
     end
   end
 end

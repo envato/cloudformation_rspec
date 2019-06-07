@@ -22,6 +22,7 @@ describe CloudFormationRSpec::ChangeSet do
     allow(cf_stub).to receive(:describe_stacks).and_return(stacks_mock)
     allow(cf_stub).to receive(:wait_until).and_return(true)
     allow(change_set_mock).to receive(:status).and_return("CREATE_COMPLETE")
+    allow(change_set_mock).to receive(:status_reason).and_return("Success")
     allow(change_set_mock).to receive(:changes).and_return([aws_change_mock])
     allow(aws_change_mock).to receive(:resource_change).and_return(aws_resource_change_mock)
     allow(stacks_mock).to receive(:stacks).and_return([stack_mock])
@@ -131,6 +132,7 @@ describe CloudFormationRSpec::ChangeSet do
     before do
       allow(cf_stub).to receive(:wait_until).and_raise(Aws::Waiters::Errors::WaiterFailed)
       allow(change_set_mock).to receive(:status).and_return("FAILED")
+      allow(change_set_mock).to receive(:status_reason).and_return("FAILED")
     end
 
     it 'just deletes the change set' do

@@ -15,7 +15,7 @@ class CloudFormationRSpec::ChangeSet
 
   @change_set_cache = {}
 
-  attr_reader :changes, :status
+  attr_reader :changes, :status, :status_reason
 
   def initialize(template_body:, parameters: {})
     @template_body = template_body
@@ -38,6 +38,7 @@ class CloudFormationRSpec::ChangeSet
     if change_set = self.class.get_from_cache(change_set_hash)
       @status = change_set.status
       @changes = change_set.changes.map { |change| CloudFormationRSpec::ResourceChange.new(change.resource_change.resource_type, change.resource_change.logical_resource_id) }
+      @status_reason = change_set.status_reason
       return change_set
     end
 
@@ -58,6 +59,7 @@ class CloudFormationRSpec::ChangeSet
     end
     @status = response.status
     @changes = response.changes.map { |change| CloudFormationRSpec::ResourceChange.new(change.resource_change.resource_type, change.resource_change.logical_resource_id) }
+    @status_reason = response.status_reason
     client.delete_change_set(change_set_name: change_set_name, stack_name: change_set_name)
     client.delete_stack(stack_name: change_set_name) if stack_created
     self.class.add_to_cache(change_set_hash, response)

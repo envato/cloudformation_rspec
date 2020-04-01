@@ -32,7 +32,8 @@ module CloudFormationRSpec::Matchers::Validate
   end
 
   def cfn_lint_available
-    !system('cfn-lint', '--version').nil?
+    _, _, status = Open3.capture3('cfn-lint', '-l')
+    status.exitstatus == 0
   end
 end
 

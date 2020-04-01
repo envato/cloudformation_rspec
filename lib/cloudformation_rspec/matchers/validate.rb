@@ -23,11 +23,11 @@ module CloudFormationRSpec::Matchers::Validate
     Tempfile.open(['cfn-lint', '.json']) do |f|
       f.write(template_body)
       f.flush
-      _, stderr, status = Open3.capture3('cfn-lint', f.path)
-      if !status
-        @error = stderr
+      stdout, _stderr, status = Open3.capture3('cfn-lint', '-i', 'W', '--', f.path)
+      if status.exitstatus != 0
+        @error = stdout
       end
-      status
+      status.exitstatus == 0
     end
   end
 

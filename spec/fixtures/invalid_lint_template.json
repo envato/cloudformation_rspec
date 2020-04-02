@@ -1,21 +1,20 @@
 {
-    "AWSTemplateFormatVersion" : "2010-09-09",
-    "Resources" : {
-       "myVPC" : {
-          "Type" : "AWS::EC2::VPC",
-          "Properties" : {
-            "CidrBlock" : 1,
-            "EnableDnsSupport" : [],
-            "EnableDnsHostnames" : [],
-            "InstanceTenancy" : {},
-            "Tags" : [ {"Key" : "foo", "Value" : "bar"} ]
-          }
-       }
-    },
-    "Outputs" : {
-      "VpcId": {
-        "Value": {"Ref": "myVPC"}
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Resources" : {
+      "myVPC" : {
+        "Type" : "AWS::EC2::VPC",
+        "Properties" : {
+          "CidrBlock" : 1,
+          "EnableDnsSupport" : [],
+          "EnableDnsHostnames" : [],
+          "InstanceTenancy" : {},
+          "Tags" : [ {"Key" : "foo", "Value" : "bar"} ]
+        }
       }
+  },
+  "Outputs" : {
+    "VpcId": {
+      "Value": {"Ref": "myVPC"}
     }
-  }    
-  
+  }
+}

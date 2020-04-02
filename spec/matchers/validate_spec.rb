@@ -26,6 +26,17 @@ describe 'be_valid' do
       expect(template).not_to be_valid
     end
   end
+
+  context "the stack fails linting" do
+    let(:template) { File.join('spec', 'fixtures', 'invalid_lint_template.json') }
+    before do
+      allow(cf_stub).to receive(:validate_template)
+    end
+
+    it 'succeeds' do
+      expect(template).not_to be_valid
+    end
+  end
 end
 
 describe 'be_valid_sparkleformation' do

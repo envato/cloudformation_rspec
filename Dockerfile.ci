@@ -1,0 +1,10 @@
+FROM ruby:2.6.5-slim
+
+RUN apt update -y && apt install -y python-pip git && pip install cfn-lint
+
+COPY . /app
+WORKDIR /app
+
+RUN bundle install
+
+
